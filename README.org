@@ -1,0 +1,1 @@
+This is a super-simple streams library for Elisp, inspired by dash.el.
