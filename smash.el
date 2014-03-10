@@ -7,6 +7,7 @@
 ;; Version: 0.0.0
 ;; Created: 9 March 2014
 ;; Keywords: lists
+;; Package-Requires: ((emacs "24"))
 
 ;; This file is not part of GNU Emacs.
 
