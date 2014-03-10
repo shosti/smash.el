@@ -12,6 +12,14 @@
   (should (equal (%stream->list (%stream 3 8 1 :foo))
                  '(3 8 1 :foo))))
 
+
+(ert-deftest smash-take ()
+  (should (equal (%stream->list (%take 3 (%stream 8 1 3 2 8)))
+                 '(8 1 3)))
+  (should (equal (%stream->list (%take 5 (%stream 1 2 3)))
+                 '(1 2 3)))
+  (should (equal (%take 50 nil) nil)))
+
 (ert-deftest smash-infinite-primes ()
   (defun divisible? (x y)
     (= (% x y) 0))

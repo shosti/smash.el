@@ -85,8 +85,9 @@ EXPR must be a function of no arguments."
 ;;;###autoload
 (defun %take (n xs)
   "Return a lazy stream of the first N elements of lazy stream XS."
-  (unless (<= n 0)
-    (%cons (%car xs) (%take (1- n) (%cdr xs)))))
+  (when xs
+    (unless (<= n 0)
+      (%cons (%car xs) (%take (1- n) (%cdr xs))))))
 
 ;;;###autoload
 (defun %take-while (pred xs)
