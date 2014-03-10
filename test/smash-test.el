@@ -52,6 +52,17 @@
                                              (%stream 2 3 1 7 2)))
                  '(2 3 1))))
 
+(ert-deftest smash-drop ()
+  (should (equal (%stream->list (%drop 3 (%stream 1 2 3 4 5)))
+                 '(4 5)))
+  (should (equal (%drop 3 (%stream 1 2)) nil)))
+
+(ert-deftest smash-drop-while ()
+  (should (equal (%stream->list (%drop-while 'even? (%stream 2 8 0 1 2)))
+                 '(1 2)))
+  (should (equal (%drop-while 'even? (%stream 2 4 6 8)) nil))
+  (should (equal (%drop-while 'even? nil) nil)))
+
 (ert-deftest smash-map ()
   (should (equal (%stream->list (%map '1+ (%stream 8 1 2 7)))
                  '(9 2 3 8)))

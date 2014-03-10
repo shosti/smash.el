@@ -157,6 +157,19 @@ Eagerly evaluated; do not use on infinite streams."
       (%cons (%car xs) (%take-while pred (%cdr xs))))))
 
 ;;;###autoload
+(defun %drop (n xs)
+  (while (and xs (> n 0))
+    (setq xs (%cdr xs)
+          n (1- n)))
+  xs)
+
+;;;###autoload
+(defun %drop-while (pred xs)
+  (while (and xs (funcall pred (%car xs)))
+    (setq xs (%cdr xs)))
+  xs)
+
+;;;###autoload
 (defun %map (fn xs)
   "Map FN over lazy stream XS."
   (%with-stream xs
