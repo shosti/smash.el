@@ -168,6 +168,11 @@ Eagerly evaluated; do not use on infinite lists."
   (when list
     (%cons (car list) (%list->stream (cdr list)))))
 
+;;;###autoload
+(defun %stream (&rest items)
+  "Return a lazy stream of ITEMS."
+  (%list->stream items))
+
 (provide 'smash)
 
 ;;; smash.el ends here

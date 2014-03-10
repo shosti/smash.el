@@ -7,6 +7,11 @@
   (should (equal (%car nil) nil))
   (should (equal (%cdr nil) nil)))
 
+(ert-deftest smash-shorthand ()
+  (should (equal (%stream) nil))
+  (should (equal (%stream->list (%stream 3 8 1 :foo))
+                 '(3 8 1 :foo))))
+
 (ert-deftest smash-infinite-primes ()
   (defun divisible? (x y)
     (= (% x y) 0))
