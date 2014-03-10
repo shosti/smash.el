@@ -112,7 +112,7 @@ EXPR must be a function of no arguments."
 (defun %reduce-from (fn initial-value xs)
   "Reduce two-argument FN, starting with INITIAL-VALUE, across lazy stream XS.
 
-Eagerly evaluated; do not use on infinite lists."
+Eagerly evaluated; do not use on infinite streams."
   (let ((acc initial-value))
     (while xs
       (setq acc (funcall fn acc (%car xs))
@@ -132,7 +132,7 @@ Eagerly evaluated; do not use on infinite lists."
 (defun %contains? (xs x)
   "Return t if lazy stream XS contains element X.
 
-Eagerly evaluated; do not use on infinite lists."
+Eagerly evaluated; do not use on infinite streams."
   (catch 'return
     (while xs
       (if (equal (%car xs) x)
@@ -143,7 +143,7 @@ Eagerly evaluated; do not use on infinite lists."
 (defun %any? (pred xs)
   "Return t if PRED is true for any element of lazy stream XS.
 
-Eagerly evaluated; do not use on infinite lists."
+Eagerly evaluated; do not use on infinite streams."
   (catch 'return
     (while xs
       (if (funcall pred (%car xs))
@@ -159,7 +159,7 @@ Eagerly evaluated; do not use on infinite lists."
 (defun %stream->list (xs)
   "Convert lazy stream XS to a concrete list.
 
-Eagerly evaluated; do not use on infinite lists."
+Eagerly evaluated; do not use on infinite streams."
   (when xs
     (cons (%car xs) (%stream->list (%cdr xs)))))
 
