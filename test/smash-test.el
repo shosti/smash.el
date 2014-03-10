@@ -3,6 +3,10 @@
 (require 'ert)
 (require 'smash)
 
+(ert-deftest smash-nil ()
+  (should (equal (%car nil) nil))
+  (should (equal (%cdr nil) nil)))
+
 (ert-deftest smash-infinite-primes ()
   (defun divisible? (x y)
     (= (% x y) 0))

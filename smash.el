@@ -71,7 +71,8 @@ EXPR must be a function of no arguments."
 ;;;###autoload
 (defun %cdr (xs)
   "Return the cdr of lazy stream XS."
-  (%force (cdr xs)))
+  (when xs
+    (%force (cdr xs))))
 
 ;;;###autoload
 (defun %nth (n xs)
