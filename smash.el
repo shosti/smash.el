@@ -75,6 +75,10 @@ EXPR must be a function of no arguments."
     (%force (cddr xs))))
 
 ;;;###autoload
+(defun %stream? (xs)
+  (and (consp xs) (eq (car xs) 'lazy-cons)))
+
+;;;###autoload
 (defun %nth (n xs)
   "Return the Nth element of lazy stream XS."
   (while (and xs (> n 0))

@@ -27,6 +27,13 @@
   (should (equal (%stream->list (%stream 3 8 1 :foo))
                  '(3 8 1 :foo))))
 
+(ert-deftest smash-stream? ()
+  (should (%stream? (%cons 3 nil)))
+  (should (%stream? (%stream 1 2 3)))
+  (should-not (%stream? (list 1 2 3)))
+  (should-not (%stream? 3))
+  (should-not (%stream? nil)))
+
 (ert-deftest smash-nth ()
   (should (equal (%nth 1 nil) nil))
   (let ((stream (%stream 2 8 1 7 "blue" :red)))
