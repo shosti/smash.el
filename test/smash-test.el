@@ -64,12 +64,12 @@
                  '(2 4 6)))
   (should (equal (%filter 'even? nil) nil)))
 
-(ert-deftest smash-contains ()
+(ert-deftest smash-contains? ()
   (should (%contains? (%stream 1 8 2 5 6) 5))
   (should-not (%contains? (%stream 1 8 2 5 6) 4))
   (should-not (%contains? nil 7)))
 
-(ert-deftest smash-any ()
+(ert-deftest smash-any? ()
   (should (%any? 'even? (%stream 3 1 7 8)))
   (should-not (%any? 'even? (%stream 71 83 1 7)))
   (should-not (%any? 'even? nil)))
