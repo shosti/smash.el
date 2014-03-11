@@ -38,26 +38,15 @@
 ;; Macros ;;
 ;;;;;;;;;;;;
 
-;; This has to be a macro because the batch byte compiler can't deal
-;; with macros relying on functions.
-(defmacro %-ensure-stream (xs)
-  "Return a form that coerces XS to a lazy stream.
-
-Helper macro for `%with-stream'--do not call directly."
-  `'(cond ((%stream? ,xs) ,xs)
-          ((listp ,xs) (%list->stream ,xs))
-          (t (error "Stream or list required"))))
-
 (defmacro %with-stream (xs &rest body)
   "Coerce XS to a lazy stream and execute BODY.
 
 The variable XS is intentionally captured; it must be the same
 variable inside and outside of BODY (although it does not need to
 be called XS)."
-  (let ((ensure-clause (%-ensure-stream xs)))
-    `(when ,xs
-       (let ((,xs ,ensure-clause))
-         ,@body))))
+  `(when ,xs
+     (let ((,xs (%ensure-stream ,xs)))
+       ,@body)))
 
 (put '%with-stream 'lisp-indent-function 1)
 
@@ -109,6 +98,36 @@ EXPR must be a function of no arguments."
 (defun %stream? (xs)
   "Return t if XS is a lazy stream."
   (and (consp xs) (eq (car xs) 'lazy-cons)))
+
+;;;;;;;;;;;;;;;;;;;;;
+;; List conversion ;;
+;;;;;;;;;;;;;;;;;;;;;
+
+;;;###autoload
+(defun %stream->list (xs)
+  "Convert lazy stream XS to a concrete list.
+
+Eagerly evaluated; do not use on infinite streams."
+  (when xs
+    (cons (%car xs) (%stream->list (%cdr xs)))))
+
+;;;###autoload
+(defun %list->stream (list)
+  "Return a lazy stream of the elements from list LIST."
+  (when list
+    (%cons (car list) (%list->stream (cdr list)))))
+
+;;;###autoload
+(defun %stream (&rest items)
+  "Return a lazy stream of ITEMS."
+  (%list->stream items))
+
+;;;###autoload
+(defun %ensure-stream (xs)
+  "Make sure that XS is a lazy stream if possible."
+  (cond ((%stream? xs) xs)
+        ((listp xs) (%list->stream xs))
+        (t (error "Stream or list required"))))
 
 ;;;;;;;;;;;;;;;
 ;; Functions ;;
@@ -199,25 +218,6 @@ Eagerly evaluated; do not use on infinite streams."
 (defun %iterate (fn x)
   "Return an infinite lazy stream from repeatedly applying FN, starting with X."
   (%cons x (%iterate fn (funcall fn x))))
-
-;;;###autoload
-(defun %stream->list (xs)
-  "Convert lazy stream XS to a concrete list.
-
-Eagerly evaluated; do not use on infinite streams."
-  (when xs
-    (cons (%car xs) (%stream->list (%cdr xs)))))
-
-;;;###autoload
-(defun %list->stream (list)
-  "Return a lazy stream of the elements from list LIST."
-  (when list
-    (%cons (car list) (%list->stream (cdr list)))))
-
-;;;###autoload
-(defun %stream (&rest items)
-  "Return a lazy stream of ITEMS."
-  (%list->stream items))
 
 (provide 'smash)
 
