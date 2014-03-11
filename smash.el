@@ -34,6 +34,29 @@
 
 ;;; Code:
 
+;; This has to be a macro because the batch byte compiler can't deal
+;; with macros relying on functions.
+(defmacro %-ensure-stream (xs)
+  "Return a form that coerces XS to a lazy stream.
+
+Helper macro for `%with-stream'--do not call directly."
+  `'(cond ((%stream? ,xs) ,xs)
+          ((listp ,xs) (%list->stream ,xs))
+          (t (error "Stream or list required"))))
+
+(defmacro %with-stream (xs &rest body)
+  "Coerce XS to a lazy stream and execute BODY.
+
+The variable XS is intentionally captured; it must be the same
+variable inside and outside of BODY (although it does not need to
+be called XS)."
+  (let ((ensure-clause (%-ensure-stream xs)))
+    `(when ,xs
+       (let ((,xs ,ensure-clause))
+         ,@body))))
+
+(put '%with-stream 'lisp-indent-function 1)
+
 ;;;###autoload
 (defun %memo (expr)
   "Memoize EXPR.
@@ -76,40 +99,43 @@ EXPR must be a function of no arguments."
 
 ;;;###autoload
 (defun %stream? (xs)
+  "Return t if XS is a lazy stream."
   (and (consp xs) (eq (car xs) 'lazy-cons)))
 
 ;;;###autoload
 (defun %nth (n xs)
   "Return the Nth element of lazy stream XS."
-  (while (and xs (> n 0))
-    (setq xs (%cdr xs)
-          n (1- n)))
-  (%car xs))
+  (%with-stream xs
+    (while (and xs (> n 0))
+      (setq xs (%cdr xs)
+            n (1- n)))
+    (%car xs)))
 
 ;;;###autoload
 (defun %take (n xs)
   "Return a lazy stream of the first N elements of lazy stream XS."
-  (when xs
+  (%with-stream xs
     (unless (<= n 0)
       (%cons (%car xs) (%take (1- n) (%cdr xs))))))
 
 ;;;###autoload
 (defun %take-while (pred xs)
   "Return a lazy stream of the first elements for which PRED is true from XS."
-  (when (and xs (funcall pred (%car xs)))
-    (%cons (%car xs) (%take-while pred (%cdr xs)))))
+  (%with-stream xs
+    (when (and xs (funcall pred (%car xs)))
+      (%cons (%car xs) (%take-while pred (%cdr xs))))))
 
 ;;;###autoload
 (defun %map (fn xs)
   "Map FN over lazy stream XS."
-  (when xs
+  (%with-stream xs
     (%cons (funcall fn (%car xs))
            (%map fn (%cdr xs)))))
 
 ;;;###autoload
 (defun %reduce (fn xs)
   "Reduce two-argument FN across lazy stream XS."
-  (when xs
+  (%with-stream xs
     (%reduce-from fn (%car xs) (%cdr xs))))
 
 ;;;###autoload
@@ -118,15 +144,16 @@ EXPR must be a function of no arguments."
 
 Eagerly evaluated; do not use on infinite streams."
   (let ((acc initial-value))
-    (while xs
-      (setq acc (funcall fn acc (%car xs))
-            xs (%cdr xs)))
+    (%with-stream xs
+      (while xs
+        (setq acc (funcall fn acc (%car xs))
+              xs (%cdr xs))))
     acc))
 
 ;;;###autoload
 (defun %filter (pred xs)
   "Return a lazy stream of elements for which PRED is true from lazy stream XS."
-  (when xs
+  (%with-stream xs
     (let ((x (%car xs)))
       (if (funcall pred x)
           (%cons x (%filter pred (%cdr xs)))
@@ -137,22 +164,24 @@ Eagerly evaluated; do not use on infinite streams."
   "Return t if lazy stream XS contains element X.
 
 Eagerly evaluated; do not use on infinite streams."
-  (catch 'return
-    (while xs
-      (if (equal (%car xs) x)
-          (throw 'return t)
-        (setq xs (%cdr xs))))))
+  (%with-stream xs
+    (catch 'return
+      (while xs
+        (if (equal (%car xs) x)
+            (throw 'return t)
+          (setq xs (%cdr xs)))))))
 
 ;;;###autoload
 (defun %any? (pred xs)
   "Return t if PRED is true for any element of lazy stream XS.
 
 Eagerly evaluated; do not use on infinite streams."
-  (catch 'return
-    (while xs
-      (if (funcall pred (%car xs))
-          (throw 'return t)
-        (setq xs (%cdr xs))))))
+  (%with-stream xs
+    (catch 'return
+      (while xs
+        (if (funcall pred (%car xs))
+            (throw 'return t)
+          (setq xs (%cdr xs)))))))
 
 ;;;###autoload
 (defun %iterate (fn x)
