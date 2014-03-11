@@ -61,18 +61,18 @@ EXPR must be a function of no arguments."
 ;;;###autoload
 (defmacro %cons (x y)
   "Create a new lazy cons pair from X and Y."
-  `(cons ,x (%delay ,y)))
+  `(cons 'lazy-cons (cons ,x (%delay ,y))))
 
 ;;;###autoload
 (defun %car (xs)
   "Return the car of lazy stream XS."
-  (car xs))
+  (cadr xs))
 
 ;;;###autoload
 (defun %cdr (xs)
   "Return the cdr of lazy stream XS."
   (when xs
-    (%force (cdr xs))))
+    (%force (cddr xs))))
 
 ;;;###autoload
 (defun %nth (n xs)
