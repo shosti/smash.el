@@ -34,6 +34,10 @@
 
 ;;; Code:
 
+;;;;;;;;;;;;
+;; Macros ;;
+;;;;;;;;;;;;
+
 ;; This has to be a macro because the batch byte compiler can't deal
 ;; with macros relying on functions.
 (defmacro %-ensure-stream (xs)
@@ -56,6 +60,10 @@ be called XS)."
          ,@body))))
 
 (put '%with-stream 'lisp-indent-function 1)
+
+;;;;;;;;;;;;;;;;
+;; Primitives ;;
+;;;;;;;;;;;;;;;;
 
 ;;;###autoload
 (defun %memo (expr)
@@ -101,6 +109,10 @@ EXPR must be a function of no arguments."
 (defun %stream? (xs)
   "Return t if XS is a lazy stream."
   (and (consp xs) (eq (car xs) 'lazy-cons)))
+
+;;;;;;;;;;;;;;;
+;; Functions ;;
+;;;;;;;;;;;;;;;
 
 ;;;###autoload
 (defun %nth (n xs)
